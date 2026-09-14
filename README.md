@@ -1,8 +1,10 @@
 # Untouch
 
 A tray utility that fixes bad touchpad palm rejection: instead of your palms accidentally
-moving the cursor while you type, the touchpad (and mouse) can be switched fully on or off
-with a **four-finger swipe up** — no keys to hold, no settings menu to dig into.
+moving the cursor while you type, a **four-finger swipe up** switches off just the part of the
+touchpad (and mouse) that causes it — while three- and four-finger gestures, including the
+swipe that turns it back on, keep working the whole time. No keys to hold, no settings menu to
+dig into.
 
 ## What it does
 
@@ -15,11 +17,18 @@ Swipe with four fingers on the touchpad:
 | **Swipe left** | Switch to previous virtual desktop |
 | **Swipe right** | Switch to next virtual desktop |
 
-When "off," **all** pointer input is blocked system-wide — not just the internal touchpad, but
-also any plugged-in external mouse — until the next swipe-up turns it back on. This is
-intentional: the point is to make the touchpad safe to rest your palms on while typing, and
-the simplest way to guarantee that is to block pointer input uniformly rather than try to
-guess which device a given movement came from.
+When "off," only **single-finger movement/clicks and two-finger scroll** are blocked — the
+exact motions that cause accidental cursor jumps and stray clicks when your palms rest on the
+touchpad while typing. This is blocked system-wide, for any pointer device (internal touchpad
+or a plugged-in external mouse), not just the specific finger that touched down — the
+simplest way to guarantee it's actually safe to rest your palms, without trying to guess which
+device a given movement came from.
+
+Everything multi-finger keeps working even while "off": three-finger swipes still do whatever
+you have them set to in Windows (task switching, etc.), and all four Untouch gestures — up,
+down, left, right, including the swipe-up that turns it back on — behave identically whether
+the touchpad is on or off. "Off" only removes the part of the touchpad that causes problems
+while typing; it doesn't turn the touchpad into a dead slab.
 
 The app starts with the touchpad **enabled** every time it launches (including at login, if
 autostart is on). Swipe up toggles between on and off from there; whichever state you land in
