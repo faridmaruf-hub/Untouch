@@ -7,11 +7,11 @@ clean "how it works" explanation — that's what the source code and tray menu a
 
 ## 1. The original problem
 
-Laurent's complaint: laptop touchpad palm rejection is bad. While typing, parts of both palms
-rest on the touchpad surface, and it's misread as a finger, moving the cursor. Tweaking
-touchpad settings never fixed it. Disabling the touchpad and using a mouse instead works, but
-isn't sustainable — not always carrying a mouse, and still wanting to use the touchpad when
-no mouse is present. Manually toggling it on/off in Settings every time is painful.
+My complaint: laptop touchpad palm rejection is bad. While typing, parts of both palms rest on
+the touchpad surface, and it's misread as a finger, moving the cursor. Tweaking touchpad
+settings never fixed it. Disabling the touchpad and using a mouse instead works, but isn't
+sustainable — not always carrying a mouse, and still wanting to use the touchpad when no mouse
+is present. Manually toggling it on/off in Settings every time is painful.
 
 **First-thought design:** hold a key on the keyboard; touchpad is enabled only while the key
 is held, disabled the instant it's released. Plus a tray icon to toggle the whole thing on/off.
@@ -31,12 +31,12 @@ An existing off-the-shelf tool ("Touchpad Blocker" — auto-disables while typin
 as a maybe-good-enough alternative. Rejected: distrust of the automatic heuristic, and
 dislike of the delay it introduces by design.
 
-Also rejected up front: simulating the laptop's own Fn+touchpad-toggle hotkey. Laurent had
-already tried it and found it's friction — wrong hand position (Fn is not ergonomically where
-he wants the trigger), which is a different objection than "it doesn't work." He wanted the
-hold-key to sit near the *opposite* hand from the one operating the touchpad (right hand on
-touchpad → trigger key reachable by the left hand, as close and unspecialized as possible).
-Ctrl was proposed as that key.
+Also rejected up front: simulating the laptop's own Fn+touchpad-toggle hotkey. I had already
+tried it and found it's friction — wrong hand position (Fn is not ergonomically where I want
+the trigger), which is a different objection than "it doesn't work." I wanted the hold-key to
+sit near the *opposite* hand from the one operating the touchpad (right hand on touchpad →
+trigger key reachable by the left hand, as close and unspecialized as possible). Ctrl was
+proposed as that key.
 
 **Decision at this point:** go with mechanism B (instant suppression) using Left Ctrl as the
 hold key, accepting the added engineering risk over mechanism A's assumed lag.
@@ -88,13 +88,13 @@ release.
 
 ## 6. Ctrl turns out to be the wrong key
 
-Laurent caught something the design had missed: **Ctrl is a global OS modifier.** Holding it
-for the whole duration of a touchpad interaction means every click made *while using the
-touchpad* is silently a Ctrl+click — breaking multi-select (can't click away to deselect),
-Ctrl+drag-copies-instead-of-moves, and double-clicking a folder opens it in a new window. This
-isn't a settings quirk, it's baked into Explorer and most apps. Any modifier key (Ctrl, Shift,
-Alt, Win) has this same problem — the hold-key had to be something with no OS-level meaning
-when held during a click.
+I caught something the design had missed: **Ctrl is a global OS modifier.** Holding it for the
+whole duration of a touchpad interaction means every click made *while using the touchpad* is
+silently a Ctrl+click — breaking multi-select (can't click away to deselect), Ctrl+drag-copies-
+instead-of-moves, and double-clicking a folder opens it in a new window. This isn't a settings
+quirk, it's baked into Explorer and most apps. Any modifier key (Ctrl, Shift, Alt, Win) has
+this same problem — the hold-key had to be something with no OS-level meaning when held during
+a click.
 
 **Pivot:** Caps Lock. Not a modifier, physically close to the same corner, and — since the
 app's own hook sees every keystroke first — its real toggle/LED effect could be swallowed
@@ -102,9 +102,9 @@ before Windows ever sees it (`return 1` from the hook instead of forwarding the 
 
 ## 7. Caps Lock doesn't feel right either
 
-Rebuilt the hook to watch Caps Lock and swallow it. Functionally correct, but Laurent's
-verdict: "not as smooth as Ctrl," "too far away," "too specialized a key to give up." He also
-asked directly: **what about Fn?**
+Rebuilt the hook to watch Caps Lock and swallow it. Functionally correct, but my verdict: "not
+as smooth as Ctrl," "too far away," "too specialized a key to give up." I also asked directly:
+**what about Fn?**
 
 Answer given: on virtually all laptops, **Fn isn't a real key from the OS's point of view** —
 it's consumed entirely inside the keyboard's embedded controller, which uses it only to remap
@@ -112,7 +112,7 @@ it's consumed entirely inside the keyboard's embedded controller, which uses it 
 Windows at all.
 
 Rather than assert that from memory, built a tiny standalone diagnostic (`KeyDiag`) — a raw
-`WH_KEYBOARD_LL` logger printing every event. Laurent ran it and pressed Fn alone, then Fn+F5:
+`WH_KEYBOARD_LL` logger printing every event. I ran it and pressed Fn alone, then Fn+F5:
 **zero log lines for either.** Confirmed empirically, not by assumption. Also visible in that
 same log: Caps Lock **auto-repeats** while held (a burst of KEYDOWNs with no KEYUP between
 them) where Ctrl does not — a plausible partial explanation for "not as smooth," though by
@@ -120,14 +120,14 @@ that point the ergonomic objection (reach, specialness) mattered more than any r
 smoothness question.
 
 Windows key was floated as the next candidate (no click-modifying semantics, thumb-reachable
-from the same corner) — but before testing it, Laurent proposed something different.
+from the same corner) — but before testing it, I proposed something different.
 
 ## 8. The idea that actually shipped: four-finger swipe
 
-Laurent's observation: a four-finger swipe currently does the same thing as a three-finger
-swipe on this touchpad (redundant), so **why not repurpose the unused four-finger gesture
-as the toggle**, instead of any key at all? Explicitly framed as "not hold-to-enable anymore,"
-but wanted to explore it anyway.
+My observation: a four-finger swipe currently does the same thing as a three-finger swipe on
+this touchpad (redundant), so **why not repurpose the unused four-finger gesture as the
+toggle**, instead of any key at all? Explicitly framed as "not hold-to-enable anymore," but
+wanted to explore it anyway.
 
 This is a materially different, harder problem than a keyboard hook: Windows' own multi-finger
 gesture *recognition* (the thing that turns raw finger movement into "open Task View") is only
@@ -136,7 +136,7 @@ exposed to whichever window is currently focused and has explicitly opted in
 path that *is* available in the background is the touchpad's **raw multi-touch HID reports**
 via Raw Input — but that meant reimplementing finger-counting and swipe-direction detection
 from scratch, a real step up in scope from a keyboard hook. Flagged clearly as such before
-starting, and Laurent chose to go ahead and build it anyway.
+starting, and I chose to go ahead and build it anyway.
 
 Two things needed to be true for this to work at all, checked before writing the detector:
 
@@ -197,8 +197,8 @@ at all times (for gesture detection), and separately suppress actual pointer *ou
 (movement/clicks) via a `WH_MOUSE_LL` hook whenever "blocked." This also meant the earlier
 "mechanism B" concerns (distinguishing touchpad from an external mouse) no longer applied,
 because a modifier key is no longer being held during clicks — so the hook could simply block
-*all* pointer input uniformly, which Laurent explicitly accepted (blocking a plugged-in mouse
-too, in exchange for simplicity) after being asked directly.
+*all* pointer input uniformly, which I explicitly accepted (blocking a plugged-in mouse too, in
+exchange for simplicity) after being asked directly.
 
 This also meant the app no longer needed admin rights at all (`CM_Disable_DevNode` was the
 only thing that had required elevation) — removed `requireAdministrator` from the manifest.
@@ -213,8 +213,8 @@ within a time window, cool down until fingers lift below 4 again). Added a "Forc
 ## 11. The lockout incident
 
 First live test of the new mechanism: **the touchpad and mouse got stuck fully blocked, with
-no way to re-enable them.** A real incident, not a hypothetical — Laurent was locked out of
-pointer input entirely.
+no way to re-enable them.** A real incident, not a hypothetical — I was locked out of pointer
+input entirely.
 
 Recovery, talked through in real time:
 1. `Ctrl+Shift+Esc` (Task Manager) — the process wasn't visible in the default view (a
@@ -247,17 +247,17 @@ Retested: full on → off → on toggle cycle via swipe confirmed working.
 
 ## 13. Wanting the other three directions back — cleanly
 
-With "Four-finger gestures" set to "Nothing" to avoid double-firing, Laurent noted the
-trade-off: losing native down/left/right swipe animations too, when only "up" actually needed
-to be intercepted. Asked if just the up-direction's native action (Task View) could be
-suppressed while leaving the other three native gestures untouched.
+With "Four-finger gestures" set to "Nothing" to avoid double-firing, I noted the trade-off:
+losing native down/left/right swipe animations too, when only "up" actually needed to be
+intercepted. Asked if just the up-direction's native action (Task View) could be suppressed
+while leaving the other three native gestures untouched.
 
 Two options laid out: (A) let native gestures fire and dismiss the side-effect afterward with
 a synthetic Escape keystroke (simple, but a possible visible flicker), or (B) turn off native
 four-finger gestures entirely and have the app's own detector handle *all four* directions
 itself, sending the equivalent keyboard shortcuts for down/left/right (Win+D, Ctrl+Win+Left/
-Right) instead of relying on Windows' native animated gesture. Laurent chose B — full control,
-no flicker, at the cost of losing the native animation feel for the other three directions.
+Right) instead of relying on Windows' native animated gesture. I chose B — full control, no
+flicker, at the cost of losing the native animation feel for the other three directions.
 
 Extended `SwipeDetector` to track both X and Y centroids and classify direction by whichever
 axis moved further past the threshold; added `KeySender` (a `SendInput` wrapper) for
@@ -285,12 +285,12 @@ redrew the icon from a generic colored circle with a "T" into an actual rounded-
 touchpad shape with a click-bar, at the same time.
 
 With the mechanism now entirely swipe-based, the name "TouchpadHoldToUse" no longer described
-what the project did. Renamed to **Untouch** (Laurent's choice, after a few suggested
-alternatives). The rename hit two filesystem snags: a lingering `dotnet.exe` build-server
-process was holding file handles inside the tree (killed it), and a second, never-fully-
-diagnosed "Access is denied" persisted on the top-level folder rename even after that — worked
-around by creating the new `Untouch` folder fresh and copying/text-replacing the source files
-into it individually, rather than fighting the lock further.
+what the project did. Renamed to **Untouch** (my choice, after a few suggested alternatives).
+The rename hit two filesystem snags: a lingering `dotnet.exe` build-server process was holding
+file handles inside the tree (killed it), and a second, never-fully-diagnosed "Access is
+denied" persisted on the top-level folder rename even after that — worked around by creating
+the new `Untouch` folder fresh and copying/text-replacing the source files into it
+individually, rather than fighting the lock further.
 
 ## 15. Two polish requests, one bigger fix
 
@@ -305,8 +305,8 @@ into it individually, rather than fighting the lock further.
   preference per *executable path*, and the app's path had changed several times during
   development (different drive, rename) — so Windows kept treating each version as a new,
   unknown icon and defaulting it back to hidden. Offered the cheap fix (drag it out once more,
-  now that the path is stable) versus a permanent one; Laurent asked for the permanent fix.
-  Rewrote the tray icon from WinForms' `NotifyIcon` to a hand-rolled `Shell_NotifyIcon` wrapper
+  now that the path is stable) versus a permanent one; I asked for the permanent fix. Rewrote
+  the tray icon from WinForms' `NotifyIcon` to a hand-rolled `Shell_NotifyIcon` wrapper
   (`GuidTrayIcon`) carrying a fixed, hardcoded GUID identity — so the visibility preference is
   now pinned to that GUID forever, independent of the exe's path, surviving any future move,
   rename, or rebuild. (Minor cleanup along the way: renamed a couple of members that were
@@ -315,8 +315,8 @@ into it individually, rather than fighting the lock further.
 ## 16. Moving the project, and startup behavior
 
 Moved the entire project from `Documents\Untouch` into this Magento working directory's
-`19. Additionals\Untouch` folder, at Laurent's request (one file lock hit again mid-move,
-from the exe still running — resolved by closing it first).
+`19. Additionals\Untouch` folder, at my request (one file lock hit again mid-move, from the
+exe still running — resolved by closing it first).
 
 Asked whether it would work unmodified on another laptop: yes, if that laptop also has a
 genuine Windows Precision Touchpad (the HID layout is discovered dynamically, not hardcoded to
@@ -328,48 +328,46 @@ Final behavior change requested: the touchpad should start **enabled** on every 
 (including autostart at login), not blocked-by-default waiting for a swipe. Fixed
 `ApplyInitialState()` to always start unblocked.
 
-Attempting to register the login-startup scheduled task directly (via `schtasks`) from this
-session's own shell failed with "Access is denied" — the sandboxed shell this assistant runs
-commands in doesn't have rights to talk to Task Scheduler, a reasonable restriction on a
-persistence mechanism. Handed off to Laurent to do himself via the tray menu's own "Start
-automatically at login" checkbox, which runs in his normal session and isn't subject to that
-restriction.
+Attempting to register the login-startup scheduled task directly (via `schtasks`) from the
+assistant's own sandboxed shell failed with "Access is denied" — that shell doesn't have rights
+to talk to Task Scheduler, a reasonable restriction on a persistence mechanism. Did it myself
+instead, via the tray menu's own "Start automatically at login" checkbox, which runs in my
+normal session and isn't subject to that restriction.
 
 ## 17. Publishing it: a repo, a license, and a description that undersold it
 
-Asked to publish the project as a GitHub repo. `git` was available; the GitHub CLI (`gh`)
-wasn't — installed it via `winget`. Authentication needed a real browser login, which the
-sandboxed shell this assistant runs commands in couldn't do itself — Laurent ran `gh auth
-login --web` in his own terminal instead.
+Asked the assistant to publish the project as a GitHub repo. `git` was available; the GitHub
+CLI (`gh`) wasn't — installed it via `winget`. Authentication needed a real browser login,
+which the assistant's sandboxed shell couldn't do itself — ran `gh auth login --web` in my own
+terminal instead.
 
-Wrote `README.md` (current-state usage docs, separate from this history file) and a
-`.gitignore` excluding build output (`bin/`, `obj/`, `publish/`), then hit the same kind of
-sandbox limitation twice more: `git init`/`commit` failed with "detected dubious ownership"
+The assistant wrote `README.md` (current-state usage docs, separate from this history file)
+and a `.gitignore` excluding build output (`bin/`, `obj/`, `publish/`), then hit the same kind
+of sandbox limitation twice more: `git init`/`commit` failed with "detected dubious ownership"
 (a Windows/network-drive safety check unrelated to permissions), worked around per-command
 with `git -c safe.directory='*'` rather than editing global git config; and pushing itself
-needed `gh repo create ... --push` run from Laurent's own authenticated shell, which hit the
-*same* dubious-ownership error there too — resolved properly that time by having Laurent add
-a `safe.directory` exception scoped to just that one folder via his own `git config
---global`, since it's his config to change, not something this assistant does on a user's
-behalf.
+needed `gh repo create ... --push` run from my own authenticated shell, which hit the *same*
+dubious-ownership error there too — resolved properly that time by adding a `safe.directory`
+exception scoped to just that one folder via my own `git config --global`, since it's my
+config to change, not something the assistant does on my behalf.
 
-Added an MIT `LICENSE` (commit identity for this repo, at Laurent's explicit instruction, is
-"Farid Maruf" / faridmaruf-hub — not Laurent's own name), then a repo description and topics.
+Added an MIT `LICENSE` (commit identity for this repo is "Farid Maruf" / faridmaruf-hub — my
+own name and GitHub account), then a repo description and topics.
 
-**Correction, caught by Laurent, not by testing:** the repo description and README both said
-"blocks all pointer input" when off. Laurent pointed out this wasn't quite right: three-finger
-gestures are recognized entirely by Windows' native gesture engine and never pass through the
-`WH_MOUSE_LL` pipeline `MouseSuppressor` hooks, and four-finger gestures are handled by
-`SwipeDetector`, which runs independently of the blocked flag *by necessity* (it has to keep
-listening even while "off," or there'd be no way to swipe back on) — so both keep working
-regardless of state, and the description was underselling a real feature rather than being
-merely imprecise. Verified by reading `OnSwipeDetected` and `MouseSuppressor` before agreeing,
-rather than taking the correction on faith — confirmed exactly as described: down/left/right
-never check the blocked flag, and two-finger scroll (via `WM_MOUSEWHEEL`) was, at the time,
-still being blocked along with cursor movement, which was actually the *next* thing to fix.
-Rewrote the README's framing and the GitHub description accordingly, and added topics
-(`gestures`, `multitouch`, `palm-rejection`, `productivity`) reflecting what actually makes
-the tool distinctive rather than just its tech stack.
+**Correction I caught, not the assistant through testing:** the repo description and README
+both said "blocks all pointer input" when off. I pointed out this wasn't quite right:
+three-finger gestures are recognized entirely by Windows' native gesture engine and never pass
+through the `WH_MOUSE_LL` pipeline `MouseSuppressor` hooks, and four-finger gestures are
+handled by `SwipeDetector`, which runs independently of the blocked flag *by necessity* (it has
+to keep listening even while "off," or there'd be no way to swipe back on) — so both keep
+working regardless of state, and the description was underselling a real feature rather than
+being merely imprecise. The assistant verified this by reading `OnSwipeDetected` and
+`MouseSuppressor` before agreeing, rather than taking the correction on faith — confirmed
+exactly as described: down/left/right never check the blocked flag, and two-finger scroll (via
+`WM_MOUSEWHEEL`) was, at the time, still being blocked along with cursor movement, which was
+actually the *next* thing to fix. Rewrote the README's framing and the GitHub description
+accordingly, and added topics (`gestures`, `multitouch`, `palm-rejection`, `productivity`)
+reflecting what actually makes the tool distinctive rather than just its tech stack.
 
 ## 18. Narrowing the block to exactly the culprit
 
@@ -386,10 +384,10 @@ button messages, not something requiring per-device correlation. Changed
 Flagged one real risk before making the change: resting both palms flat could plausibly
 register as a two-finger contact and trigger accidental scroll now that scroll isn't blocked
 — agreed to ship it and revert if that turned out to happen in practice. Tested live with both
-palms resting on the touchpad: **no accidental scroll triggered.** Laurent's verdict: "i love
-it." Updated the README and GitHub description a second time to reflect that only
-single-finger cursor movement and clicks are blocked now — everything else, scroll included,
-works throughout.
+palms resting on the touchpad: **no accidental scroll triggered.** My verdict: "i love it."
+Updated the README and GitHub description a second time to reflect that only single-finger
+cursor movement and clicks are blocked now — everything else, scroll included, works
+throughout.
 
 ## Where things stand
 
