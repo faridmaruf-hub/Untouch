@@ -52,8 +52,14 @@ item, reachable without a mouse via Windows' built-in tray keyboard navigation
 
 ## One-time setup
 
-So the app's own swipe handling doesn't fight with Windows' built-in four-finger gestures,
-set: **Settings → Bluetooth & devices → Touchpad → Four-finger gestures → Swipes → Nothing.**
+Two things worth doing the very first time you run it, so it stays out of your way afterward:
+
+1. **Turn off Windows' own four-finger gestures**, so they don't fight with Untouch's: Settings
+   → Bluetooth & devices → Touchpad → Four-finger gestures → Swipes → **Nothing**.
+2. **Drag the tray icon out of the "hidden icons" overflow** into the always-visible tray area
+   (Windows defaults every new tray icon to hidden). The icon has a fixed identity, so you only
+   need to do this once, ever — it'll stay put across restarts, rebuilds, and even if you move
+   the app to a different folder later.
 
 ## Building it
 
