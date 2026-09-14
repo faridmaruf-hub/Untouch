@@ -1,9 +1,10 @@
 namespace Untouch;
 
-// Blocks ALL mouse/touchpad-driven pointer input system-wide while Blocked is true.
-// We don't try to distinguish the touchpad from an external mouse: with no modifier key
-// held during clicks, there's no ergonomic reason not to block everything uniformly, and
-// it avoids the fragility of per-device correlation.
+// Blocks cursor movement and clicks (single-finger drift/taps) system-wide while Blocked is
+// true, for any pointer device -- internal touchpad or an external mouse alike. Two-finger
+// scroll is deliberately left working: Windows converts it to WM_MOUSEWHEEL/WM_MOUSEHWHEEL
+// without moving the cursor, so it's a distinct message type we can exempt rather than a
+// per-device thing we'd need to correlate.
 internal sealed class MouseSuppressor : IDisposable
 {
     private nint _hookHandle;
@@ -25,7 +26,8 @@ internal sealed class MouseSuppressor : IDisposable
 
     private nint HookCallback(int nCode, nint wParam, nint lParam)
     {
-        if (nCode >= 0 && Blocked)
+        bool isWheel = wParam == NativeMethods.WM_MOUSEWHEEL || wParam == NativeMethods.WM_MOUSEHWHEEL;
+        if (nCode >= 0 && Blocked && !isWheel)
         {
             return 1; // swallow the event
         }

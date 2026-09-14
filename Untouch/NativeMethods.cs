@@ -79,6 +79,8 @@ internal static class NativeMethods
     public const int WM_SYSKEYDOWN = 0x0104;
     public const int WM_SYSKEYUP = 0x0105;
     public const int WM_INPUT = 0x00FF;
+    public const int WM_MOUSEWHEEL = 0x020A;
+    public const int WM_MOUSEHWHEEL = 0x020E;
 
     public const uint RIDEV_INPUTSINK = 0x00000100;
     public const uint RID_INPUT = 0x10000003;

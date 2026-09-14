@@ -335,10 +335,69 @@ persistence mechanism. Handed off to Laurent to do himself via the tray menu's o
 automatically at login" checkbox, which runs in his normal session and isn't subject to that
 restriction.
 
+## 17. Publishing it: a repo, a license, and a description that undersold it
+
+Asked to publish the project as a GitHub repo. `git` was available; the GitHub CLI (`gh`)
+wasn't — installed it via `winget`. Authentication needed a real browser login, which the
+sandboxed shell this assistant runs commands in couldn't do itself — Laurent ran `gh auth
+login --web` in his own terminal instead.
+
+Wrote `README.md` (current-state usage docs, separate from this history file) and a
+`.gitignore` excluding build output (`bin/`, `obj/`, `publish/`), then hit the same kind of
+sandbox limitation twice more: `git init`/`commit` failed with "detected dubious ownership"
+(a Windows/network-drive safety check unrelated to permissions), worked around per-command
+with `git -c safe.directory='*'` rather than editing global git config; and pushing itself
+needed `gh repo create ... --push` run from Laurent's own authenticated shell, which hit the
+*same* dubious-ownership error there too — resolved properly that time by having Laurent add
+a `safe.directory` exception scoped to just that one folder via his own `git config
+--global`, since it's his config to change, not something this assistant does on a user's
+behalf.
+
+Added an MIT `LICENSE` (commit identity for this repo, at Laurent's explicit instruction, is
+"Farid Maruf" / faridmaruf-hub — not Laurent's own name), then a repo description and topics.
+
+**Correction, caught by Laurent, not by testing:** the repo description and README both said
+"blocks all pointer input" when off. Laurent pointed out this wasn't quite right: three-finger
+gestures are recognized entirely by Windows' native gesture engine and never pass through the
+`WH_MOUSE_LL` pipeline `MouseSuppressor` hooks, and four-finger gestures are handled by
+`SwipeDetector`, which runs independently of the blocked flag *by necessity* (it has to keep
+listening even while "off," or there'd be no way to swipe back on) — so both keep working
+regardless of state, and the description was underselling a real feature rather than being
+merely imprecise. Verified by reading `OnSwipeDetected` and `MouseSuppressor` before agreeing,
+rather than taking the correction on faith — confirmed exactly as described: down/left/right
+never check the blocked flag, and two-finger scroll (via `WM_MOUSEWHEEL`) was, at the time,
+still being blocked along with cursor movement, which was actually the *next* thing to fix.
+Rewrote the README's framing and the GitHub description accordingly, and added topics
+(`gestures`, `multitouch`, `palm-rejection`, `productivity`) reflecting what actually makes
+the tool distinctive rather than just its tech stack.
+
+## 18. Narrowing the block to exactly the culprit
+
+Following straight on from that correction: if three- and four-finger gestures were already
+unaffected by "blocked," why was two-finger scroll still being blocked along with single-finger
+movement and clicks? Asked directly whether blocking *only* single-finger input was possible.
+
+Yes: `WH_MOUSE_LL` delivers a distinct message type per event, and two-finger scroll on a
+Precision Touchpad is converted by Windows into `WM_MOUSEWHEEL`/`WM_MOUSEHWHEEL` without
+moving the cursor at all — a different, exemptable message type from `WM_MOUSEMOVE` and the
+button messages, not something requiring per-device correlation. Changed
+`MouseSuppressor.HookCallback` to block everything *except* wheel messages while "blocked."
+
+Flagged one real risk before making the change: resting both palms flat could plausibly
+register as a two-finger contact and trigger accidental scroll now that scroll isn't blocked
+— agreed to ship it and revert if that turned out to happen in practice. Tested live with both
+palms resting on the touchpad: **no accidental scroll triggered.** Laurent's verdict: "i love
+it." Updated the README and GitHub description a second time to reflect that only
+single-finger cursor movement and clicks are blocked now — everything else, scroll included,
+works throughout.
+
 ## Where things stand
 
-`Untouch.exe` (in `Untouch\publish\`): four-finger swipe up toggles touchpad+mouse on/off
-(starting enabled on launch), down shows desktop, left/right switch virtual desktop, tray icon
-shows live state with a permanent GUID identity, Ctrl+Alt+Shift+F9 always forces it back on.
-Source and the HID diagnostic tools built along the way (`RawHidDiag`, `KeyDiag`, `IconGen`,
-and the early PowerShell test scripts) are kept alongside it in this folder.
+`Untouch.exe` (in `Untouch\publish\`): four-finger swipe up toggles single-finger cursor
+movement/clicks on/off (starting enabled on launch) while two-finger scroll and every
+multi-finger gesture keep working regardless of that state; down shows desktop, left/right
+switch virtual desktop; tray icon shows live state with a permanent GUID identity;
+Ctrl+Alt+Shift+F9 always forces it back on. Source and the HID diagnostic tools built along
+the way (`RawHidDiag`, `KeyDiag`, `IconGen`, and the early PowerShell test scripts) are kept
+alongside it in this folder. Published at github.com/faridmaruf-hub/Untouch under the MIT
+license.
