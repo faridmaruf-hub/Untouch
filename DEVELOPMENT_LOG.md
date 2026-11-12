@@ -391,11 +391,11 @@ throughout.
 
 ## 19. Letting an external mouse through
 
-Laurent noticed that with Untouch "off," a plugged-in mouse was dead too — and remembered the
-project as touchpad-only. It never had been: section 10 explicitly chose to block *all* pointer
-input, since `WH_MOUSE_LL` doesn't say which device an event came from, and the README said so.
-But in daily use, blocking the mouse turned out to be the wrong trade-off — the mouse is exactly
-what you reach for when you *don't* want the touchpad.
+I noticed that with Untouch "off," a plugged-in mouse was dead too — and I remembered the project
+as touchpad-only. It never had been: section 10 explicitly chose to block *all* pointer input,
+since `WH_MOUSE_LL` doesn't say which device an event came from, and the README said so. But in
+daily use, blocking the mouse turned out to be the wrong trade-off — the mouse is exactly what I
+reach for when I *don't* want the touchpad.
 
 Asked first whether this would affect multi-finger input (the thing that distinguishes Untouch
 from the laptop's Fn+F5 hard-off). It doesn't: the change only adds a condition *before*
@@ -413,7 +413,7 @@ rests on the touchpad is blocked too, until the palm lifts. Also a quiet safety 
 machine where the touchpad's raw data can't be parsed, nothing is blocked at all, instead of
 blocking everything with no swipe available to undo it.
 
-One self-caught bug before building: initializing `LastContactTick` to `long.MinValue` would make
+One bug caught before building: initializing `LastContactTick` to `long.MinValue` would make
 `now - LastContactTick` overflow to a negative number, reading as "just touched" — changed to
 `long.MinValue / 2`.
 
@@ -424,9 +424,9 @@ project's folder path (`FARID MA'RUF`) breaks MSBuild's publish copy step even t
 compilation succeeds. Worked around by publishing to a scratch folder with no apostrophe and
 copying the output into `publish\`; documented in the README.
 
-Tested live by Laurent: with Untouch "off," the external mouse moves and clicks normally,
-single-finger touchpad movement/taps and resting palms stay blocked, and two-finger scroll plus
-three-/four-finger gestures keep working. Verdict: "berhasil. hasil sesuai."
+Tested live: with Untouch "off," the external mouse moves and clicks normally, single-finger
+touchpad movement/taps and resting palms stay blocked, and two-finger scroll plus three-/four-
+finger gestures keep working. My verdict: "berhasil. hasil sesuai."
 
 ## Where things stand
 
