@@ -12,17 +12,18 @@ Swipe with four fingers on the touchpad:
 
 | Gesture | Action |
 |---|---|
-| **Swipe up** | Toggle touchpad + mouse pointer input on/off |
+| **Swipe up** | Toggle touchpad cursor movement/clicks on/off |
 | **Swipe down** | Show desktop (`Win+D`) |
 | **Swipe left** | Switch to previous virtual desktop |
 | **Swipe right** | Switch to next virtual desktop |
 
-When "off," only **single-finger cursor movement and clicks** are blocked — the exact motion
-that causes accidental cursor jumps and stray clicks when your palms rest on the touchpad
-while typing. This is blocked system-wide, for any pointer device (internal touchpad or a
-plugged-in external mouse), not just the specific finger that touched down — the simplest way
-to guarantee it's actually safe to rest your palms, without trying to guess which device a
-given movement came from.
+When "off," only **single-finger cursor movement and clicks on the touchpad** are blocked —
+the exact motion that causes accidental cursor jumps and stray clicks when your palms rest on
+the touchpad while typing. An **external mouse keeps working normally** the whole time: Windows
+doesn't say which device a pointer event came from, so Untouch watches the touchpad's own raw
+touch data and only blocks pointer events while the touchpad is being touched (or was touched
+within the last ~0.3 s, which covers tap-to-click). The one side effect: if you move the mouse
+while a palm is resting on the touchpad, that movement is blocked too, until the palm lifts.
 
 Everything else keeps working even while "off": two-finger scroll (resting both palms doesn't
 register as a scroll gesture, in practice), three-finger swipes (whatever you have them set to
@@ -37,8 +38,8 @@ stays until the next swipe up.
 ## Tray icon
 
 A small touchpad-shaped icon sits in the system tray:
-- **Green** — touchpad/mouse input is on.
-- **Grey** — blocked.
+- **Green** — touchpad input is on.
+- **Grey** — touchpad cursor movement/clicks blocked (external mouse still works).
 
 Right-click it for the menu; double-click it to turn the whole feature on/off (leaving the
 touchpad always on, untouched, until you turn it back on).
@@ -76,6 +77,10 @@ Two things worth doing the very first time you run it, so it stays out of your w
 cd Untouch
 dotnet publish -c Release -o ../publish
 ```
+
+If the folder path contains an apostrophe (e.g. `C:\Users\me\Documents\O'Brien\Untouch`),
+`dotnet publish` fails with `MSB3094` — an MSBuild quirk. Publish to a path without one
+(e.g. `-o C:\Temp\untouch-pub`) and copy the files into `publish\` afterwards.
 
 ## Running it
 

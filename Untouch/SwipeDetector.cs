@@ -29,6 +29,10 @@ internal sealed class SwipeDetector : Form
 
     public event Action<SwipeDirection>? SwipeDetected;
 
+    // Environment.TickCount64 of the most recent report with at least one finger on the pad.
+    // MouseSuppressor uses this to tell touchpad-driven pointer events from an external mouse.
+    public long LastContactTick { get; private set; } = long.MinValue / 2; // "never"; halved so subtracting it can't overflow
+
     public SwipeDetector()
     {
         // Never shown; exists only to own a window handle for WM_INPUT delivery.
@@ -117,6 +121,8 @@ internal sealed class SwipeDetector : Form
     {
         NativeMethods.HidP_GetUsageValue(NativeMethods.HidP_Input, DigitizerPage, 0, UsageContactCount,
             out uint contactCount, _preparsedData, report, (uint)report.Length);
+
+        if (contactCount >= 1) LastContactTick = Environment.TickCount64;
 
         if (contactCount != TargetFingers)
         {

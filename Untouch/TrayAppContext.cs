@@ -10,8 +10,8 @@ internal sealed class TrayAppContext : ApplicationContext
     private const string TaskName = "Untouch";
 
     private readonly GuidTrayIcon _trayIcon = new();
-    private readonly MouseSuppressor _suppressor = new();
     private readonly SwipeDetector _swipeDetector = new();
+    private readonly MouseSuppressor _suppressor;
     private readonly EmergencyHotkey _emergencyHotkey = new();
     private readonly Config _config;
 
@@ -25,6 +25,7 @@ internal sealed class TrayAppContext : ApplicationContext
     public TrayAppContext()
     {
         _config = Config.Load();
+        _suppressor = new MouseSuppressor(() => _swipeDetector.LastContactTick);
 
         var menu = new ContextMenuStrip();
 

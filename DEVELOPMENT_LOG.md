@@ -389,10 +389,49 @@ Updated the README and GitHub description a second time to reflect that only sin
 cursor movement and clicks are blocked now — everything else, scroll included, works
 throughout.
 
+## 19. Letting an external mouse through
+
+Laurent noticed that with Untouch "off," a plugged-in mouse was dead too — and remembered the
+project as touchpad-only. It never had been: section 10 explicitly chose to block *all* pointer
+input, since `WH_MOUSE_LL` doesn't say which device an event came from, and the README said so.
+But in daily use, blocking the mouse turned out to be the wrong trade-off — the mouse is exactly
+what you reach for when you *don't* want the touchpad.
+
+Asked first whether this would affect multi-finger input (the thing that distinguishes Untouch
+from the laptop's Fn+F5 hard-off). It doesn't: the change only adds a condition *before*
+blocking, so nothing that passed before gets blocked now. Two-finger scroll is still exempt as
+`WM_MOUSEWHEEL`, three-finger gestures never pass through the hook at all, and four-finger swipes
+are handled by `SwipeDetector` independently of the blocked flag.
+
+**Approach:** no per-device correlation of hook events needed. `SwipeDetector` already reads the
+touchpad's raw digitizer reports at all times, so it now records `LastContactTick` whenever a
+report shows at least one finger down. `MouseSuppressor` only swallows a non-wheel event while
+blocked *and* the touchpad reported contact within the last 300 ms. The grace window covers
+tap-to-click (Windows synthesizes the click after the finger lifts) and the tiny gap before the
+first raw report of a new touch is processed. Accepted side effect: moving the mouse while a palm
+rests on the touchpad is blocked too, until the palm lifts. Also a quiet safety improvement: on a
+machine where the touchpad's raw data can't be parsed, nothing is blocked at all, instead of
+blocking everything with no swipe available to undo it.
+
+One self-caught bug before building: initializing `LastContactTick` to `long.MinValue` would make
+`now - LastContactTick` overflow to a negative number, reading as "just touched" — changed to
+`long.MinValue / 2`.
+
+**Build snag:** on this machine only the .NET runtime was installed — installed the .NET 8 SDK
+via `winget` again. Then `dotnet publish -o ../publish` failed with `MSB3094`
+("DestinationFiles refers to 1 item(s), and SourceFiles refers to 4") — the apostrophe in the
+project's folder path (`FARID MA'RUF`) breaks MSBuild's publish copy step even though
+compilation succeeds. Worked around by publishing to a scratch folder with no apostrophe and
+copying the output into `publish\`; documented in the README.
+
+Tested live by Laurent: with Untouch "off," the external mouse moves and clicks normally,
+single-finger touchpad movement/taps and resting palms stay blocked, and two-finger scroll plus
+three-/four-finger gestures keep working. Verdict: "berhasil. hasil sesuai."
+
 ## Where things stand
 
-`Untouch.exe` (in `Untouch\publish\`): four-finger swipe up toggles single-finger cursor
-movement/clicks on/off (starting enabled on launch) while two-finger scroll and every
+`Untouch.exe` (in `Untouch\publish\`): four-finger swipe up toggles single-finger touchpad
+cursor movement/clicks on/off (starting enabled on launch; an external mouse is never blocked) while two-finger scroll and every
 multi-finger gesture keep working regardless of that state; down shows desktop, left/right
 switch virtual desktop; tray icon shows live state with a permanent GUID identity;
 Ctrl+Alt+Shift+F9 always forces it back on. Source and the HID diagnostic tools built along
